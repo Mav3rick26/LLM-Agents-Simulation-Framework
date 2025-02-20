@@ -1,0 +1,11 @@
+</users_list>
+
+Output your final decision on which user to follow in this exact JSON format:
+
+<JSON_format>
+{
+"Followed user": "[Put here the user you selected to follow from the users_list.]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

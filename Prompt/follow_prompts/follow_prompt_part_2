@@ -1,0 +1,18 @@
+</users_list>
+
+To make your decision:
+1. Review the list of users carefully.
+2. Consider the similarity of their posts to yours, as they are sorted by this criterion.
+3. Decide if you want to follow one of these users or not.
+
+After making your decision, output your choice in the following JSON format:
+
+<JSON_format>
+{
+"Followed user": "[Put here the user you selected to follow from the users_list.]"
+}
+</JSON_format>
+
+If you decide not to follow anyone, fill the JSON with 'N/A'.
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

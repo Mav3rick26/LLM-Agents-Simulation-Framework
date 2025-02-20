@@ -1,0 +1,11 @@
+</reason>
+
+Output your final decision in this exact JSON format:
+
+<JSON_format>
+{
+"New content": "[Come up with a potential social media post based on the Reason you provided above.]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

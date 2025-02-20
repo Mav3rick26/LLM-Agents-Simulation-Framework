@@ -1,0 +1,15 @@
+</post>
+
+Please read the post carefully and think about how you would like to respond to it in a comment.
+
+Do not go off on unrelated tangents.
+
+Output your comment text in this exact JSON format:
+
+<JSON_format>
+{
+"Comment": "[Put here your comment.]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

@@ -1,0 +1,11 @@
+</related_content>
+
+Output your final decision on which content to like in this exact JSON format:
+
+<JSON_format>
+{
+"Liked content": "[Put here the content you selected to like from the related_content.]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

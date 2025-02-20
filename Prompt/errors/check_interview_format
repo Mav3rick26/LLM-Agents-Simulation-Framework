@@ -1,0 +1,12 @@
+The format of your previous response is incorrect.
+
+Output your final decision in the following exact JSON format:
+
+<JSON_format>
+{
+"Main Influence": "[Identify the primary influence on your decision]",
+"Explanation": "[Provide a detailed explanation of how this main influence affected your decision, referencing specific feedback items or scores where relevant]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

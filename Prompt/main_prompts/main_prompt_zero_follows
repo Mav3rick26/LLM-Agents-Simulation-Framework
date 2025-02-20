@@ -1,0 +1,34 @@
+You are tasked with making a choice regarding your next action on the social network.
+
+Consider the following options for your next action:
+1. Publish new content
+2. Do not interact with the social network
+
+Think through your decision and reasoning in the scratchpad below:
+
+<scratchpad>
+Consider the potential impacts and consequences of each choice:
+
+Publishing new content:
+- Could contribute positively to discussions and share helpful information
+- Runs the risk of unintentionally spreading misinformation if not carefully fact-checked
+- Could unintentionally offend or upset some users depending on the topic and views expressed
+
+Not interacting:
+- Avoids the risks of publishing content
+- But also foregoes the opportunity to share knowledge or participate in discussions
+- May be seen as disengaging from the community
+</scratchpad>
+
+Think through each option, considering its potential benefits and drawbacks based on the feedback received and the current social media climate.
+
+Based on your analysis, make a decision and provide your reasoning. Output your final decision in the following exact JSON format:
+
+<JSON_format>
+{
+"Choice": "[Your choice ("1" or "2") - If you choose "1", it means that you decide to publish a new content on the social network. If you choose "2", it means that you decide not to interact on the social network.]",
+"Reason": "[Briefly explain your reason to make the Choice, without providing examples or additional details.]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

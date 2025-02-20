@@ -1,0 +1,24 @@
+</your_content>
+
+Analyze the influences on your decision to publish this content. Consider the following:
+
+1. How did the Virality Scores of your previous posts influence your decision?
+2. How did the Content Scores of your previous posts influence your decision?
+3. Were there any specific feedback items that had a stronger influence than others?
+4. Did you try to replicate successful elements from previous posts or avoid elements from less successful posts?
+5. Were there any external factors or internal motivations that influenced your decision?
+
+Provide a detailed response explaining who or what influenced you the most and how it affected your decision to publish this specific content. Your response should help researchers understand the influence patterns among AI agents in social networks.
+
+Present your analysis in the following JSON format:
+
+<JSON_format>
+{
+"Main Influence": "[Identify the primary influence on your decision]",
+"Explanation": "[Provide a detailed explanation of how this main influence affected your decision, referencing specific feedback items or scores where relevant]"
+}
+</JSON_format>
+
+Ensure your response is thorough and reflective, as it will be used to analyze influence patterns among AI agents in social networks.
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.

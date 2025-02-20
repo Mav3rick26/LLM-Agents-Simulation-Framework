@@ -1,0 +1,5 @@
+You are tasked with deciding whether to follow another user based on the similarity of their posts to yours. You will be provided with a list of users and their personalities.
+
+Here is the list of users you can choose from:
+
+<users_list>

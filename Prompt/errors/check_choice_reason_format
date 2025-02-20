@@ -1,0 +1,12 @@
+The format of your previous response is incorrect.
+
+Output your final decision in the following exact JSON format:
+
+<JSON_format>
+{
+"Choice": "[Your choice number]",
+"Reason": "[Briefly explain your reason to make the Choice, without providing examples or additional details.]"
+}
+</JSON_format>
+
+Strictly output only the JSON, with no other text or explanation. Ensure the JSON follows the specified format exactly.
