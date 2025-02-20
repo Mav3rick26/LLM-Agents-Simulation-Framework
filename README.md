@@ -27,7 +27,7 @@ This framework adopts a modular, phase-based approach to simulate and analyze in
 * [Jan 2025] **"Agent-Based Modelling Meets Generative AI in Social Network Simulations"**, [Paper](https://link.springer.com/chapter/10.1007/978-3-031-78541-2_10)
 * [Feb 2025] **"Can Generative Agent-Based Modeling Replicate the Friendship Paradox in Social Media Simulations?"**, [Paper](https://arxiv.org/abs/2502.05919)
 
-Check out our [LLM-Agents-For-Simulation](https://github.com/giammy677dev/LLM-Agents-for-Simulation) repository!
+Check out our [LLM-Agents-For-Simulation](https://github.com/giammy677dev/LLM-Agents-for-Simulation) repository, a collection of resources that showcase the intersection of simulation and LLM-agents!
 
 ## 🙏 Acknowledgments
 This project was developed as part of PhD research at the University of Naples Federico II. Special thanks to my supervisor Professor *Vincenzo Moscato* and my co-tutor *Valerio La Gatta* for their invaluable contributions and support.
