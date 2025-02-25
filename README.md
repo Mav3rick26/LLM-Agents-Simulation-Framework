@@ -22,7 +22,9 @@ This framework adopts a modular, phase-based approach to simulate and analyze in
 - **Memory Mechanisms**: Agents retain and prioritize past interactions.
 - **Emergent Social Phenomena**: Agents naturally replicates real-world social phenomena. 
 
-## 📰 Our papers and other useful links
+## 📰 Citations and other useful links
+
+If you use our framework in research, please cite our papers:
 
 * [Jan 2025] **"Agent-Based Modelling Meets Generative AI in Social Network Simulations"**, [Paper](https://link.springer.com/chapter/10.1007/978-3-031-78541-2_10)
 * [Feb 2025] **"Can Generative Agent-Based Modeling Replicate the Friendship Paradox in Social Media Simulations?"**, [Paper](https://arxiv.org/abs/2502.05919)
