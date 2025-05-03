@@ -11,7 +11,7 @@ model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')  # Embeddi
 llama3 = {
     "config_list": [
         {
-            "model": "SanctumAI/Meta-Llama-3-8B-Instruct-GGUF",
+            "model": "meta-llama-3.1-8b-instruct",
             "base_url": "http://localhost:1234/v1",
             "api_key": "lm-studio",
         },
