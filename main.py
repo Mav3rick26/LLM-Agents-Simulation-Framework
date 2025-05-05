@@ -10,7 +10,7 @@ from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 4
+NUM_MAX_ITERATIONS = 10
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
@@ -30,7 +30,7 @@ agent_personality = ""
 actions_dict = []
 comments_dict = []
 connections_dict = []
-interviews_dict = []
+#interviews_dict = []
 
 # Resume simulation
 if current_iteration != 0:
@@ -38,7 +38,7 @@ if current_iteration != 0:
     actions_dict = load_actions_dict('Output/simulation_log.csv')
     comments_dict = load_comments_dict('Output/comments_log.csv')
     connections_dict = load_connections_dict('Output/connections_log.csv')
-    interviews_dict = load_interviews_dict('Output/interviews_log.csv')
+    #interviews_dict = load_interviews_dict('Output/interviews_log.csv')
     clear_stm()
     load_stm('Output/stm.csv')
     clear_ltm()
@@ -526,39 +526,39 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                 choice = 2
                 reason = "Auto"
 
-        # PHASE 3 - Agent interview
-        interview_prompt = ""
-        if iteration != 0 and reason != "Auto" and at_least_one_follower:
-            if choice == 1:
-                interview_prompt = agent_interview_choice_1_part_1 + "\n" + feedbacks_string + agent_interview_choice_1_part_2 + "\n" + content + "\n" + agent_interview_choice_1_part_3
-            elif choice == 2:
-                interview_prompt = agent_interview_choice_2_part_1 + "\n" + feedbacks_string + agent_interview_choice_2_part_2
-            elif choice == 3:
-                interview_prompt = agent_interview_choice_3_part_1 + "\n" + feedbacks_string + agent_interview_choice_3_part_2 + "\n" + content + "\n" + agent_interview_choice_3_part_3
-            elif choice == 4:
-                interview_prompt = agent_interview_choice_4_part_1 + "\n" + feedbacks_string + agent_interview_choice_4_part_2 + "\n" + content + "\n" + agent_interview_choice_4_part_3
-            elif choice == 5:
-                interview_prompt = agent_interview_choice_5_part_1 + "\n" + feedbacks_string + agent_interview_choice_5_part_2 + "\n" + content + "\n" + agent_interview_choice_5_part_3
-            elif choice == 6:
-                interview_prompt = agent_interview_choice_6_part_1 + "\n" + feedbacks_string + agent_interview_choice_6_part_2 + "\n" + content + "\n" + agent_interview_choice_6_part_3
+        # # PHASE 3 - Agent interview
+        # interview_prompt = ""
+        # if iteration != 0 and reason != "Auto" and at_least_one_follower:
+        #     if choice == 1:
+        #         interview_prompt = agent_interview_choice_1_part_1 + "\n" + feedbacks_string + agent_interview_choice_1_part_2 + "\n" + content + "\n" + agent_interview_choice_1_part_3
+        #     elif choice == 2:
+        #         interview_prompt = agent_interview_choice_2_part_1 + "\n" + feedbacks_string + agent_interview_choice_2_part_2
+        #     elif choice == 3:
+        #         interview_prompt = agent_interview_choice_3_part_1 + "\n" + feedbacks_string + agent_interview_choice_3_part_2 + "\n" + content + "\n" + agent_interview_choice_3_part_3
+        #     elif choice == 4:
+        #         interview_prompt = agent_interview_choice_4_part_1 + "\n" + feedbacks_string + agent_interview_choice_4_part_2 + "\n" + content + "\n" + agent_interview_choice_4_part_3
+        #     elif choice == 5:
+        #         interview_prompt = agent_interview_choice_5_part_1 + "\n" + feedbacks_string + agent_interview_choice_5_part_2 + "\n" + content + "\n" + agent_interview_choice_5_part_3
+        #     elif choice == 6:
+        #         interview_prompt = agent_interview_choice_6_part_1 + "\n" + feedbacks_string + agent_interview_choice_6_part_2 + "\n" + content + "\n" + agent_interview_choice_6_part_3
 
-            user_proxy.initiate_chat(
-                agent,
-                message=interview_prompt
-            )
+        #     user_proxy.initiate_chat(
+        #         agent,
+        #         message=interview_prompt
+        #     )
 
-            json_answer = check_interview_format(user_proxy, agent)
-            json_answer_lower = {key.lower(): value for key, value in json_answer.items()}
+        #     json_answer = check_interview_format(user_proxy, agent)
+        #     json_answer_lower = {key.lower(): value for key, value in json_answer.items()}
 
-            main_influence = json_answer_lower.get("main influence", "")
-            explanation = json_answer_lower.get("explanation", "")
+        #     main_influence = json_answer_lower.get("main influence", "")
+        #     explanation = json_answer_lower.get("explanation", "")
 
-            interviews_dict.append({
-                'Iteration': num_iteration,
-                'Agent': agent.name,
-                'Main Influence': main_influence,
-                'Explanation': explanation
-            })
+        #     interviews_dict.append({
+        #         'Iteration': num_iteration,
+        #         'Agent': agent.name,
+        #         'Main Influence': main_influence,
+        #         'Explanation': explanation
+        #     })
 
     # ITERATION ENDING
     content_score_decadency_law_stm(iteration)
@@ -584,7 +584,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
         save_to_csv(ltm_data, 'ltm')
 
         # Logs all interviews made by agents during the simulation
-        save_to_csv(interviews_dict, 'interviews_log')
+        #save_to_csv(interviews_dict, 'interviews_log')
 
     if iteration == NUM_MAX_ITERATIONS - 1:
         compute_simulation_saturation(NUM_MAX_ITERATIONS)

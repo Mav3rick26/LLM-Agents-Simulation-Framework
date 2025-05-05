@@ -4,9 +4,10 @@ import pandas as pd
 from utils import llama3, read_from_file, save_personality_to_file
 
 # Dataset switcher
-usa_election = True
+usa_election = False
 qanon = False
 brexit = False
+personas = True
 
 user_proxy = autogen.UserProxyAgent(
     name="user_proxy",
@@ -74,6 +75,23 @@ if usa_election:
         )
 
         agent_list.append(agent)
+
+
+elif personas:
+    personality_folder = "Personalities/personas_1000"
+    
+    for filename in os.listdir(personality_folder):
+        if filename.endswith(".txt"):
+            agent_name = filename.replace(".txt", "")
+            agent_personality = read_from_file(filename, folder=personality_folder)
+
+            agent = autogen.AssistantAgent(
+                name=agent_name,
+                system_message=agent_personality,
+                llm_config=llama3,
+            )
+            agent_list.append(agent)
+
 
 elif qanon:
     dataset_folder = "Dataset/QAnon"
