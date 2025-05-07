@@ -78,7 +78,7 @@ if usa_election:
 
 
 elif personas:
-    personality_folder = "Personalities/personas_1000"
+    personality_folder = "Personalities/personas_1001"
     
     for filename in os.listdir(personality_folder):
         if filename.endswith(".txt"):

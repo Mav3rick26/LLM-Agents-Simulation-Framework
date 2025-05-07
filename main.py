@@ -10,7 +10,7 @@ from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 10
+NUM_MAX_ITERATIONS = 3
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
