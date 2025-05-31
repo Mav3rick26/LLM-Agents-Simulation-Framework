@@ -1,6 +1,7 @@
 from utils import *
-from agents import user_proxy, agent_list, personality_folder
+from agents import user_proxy, agent_list, personality_folder, behavioral_folder
 from prompts import *
+from short_term_activity_memory import *
 from short_term_memory import *
 from long_term_memory import *
 from recsys import search_recommended_contents
@@ -10,7 +11,7 @@ from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 3
+NUM_MAX_ITERATIONS = 10
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
@@ -26,6 +27,8 @@ explanation = ""
 json_answer = {}
 
 agent_personality = ""
+
+USE_AGENT_BEHAVIOR = True
 
 actions_dict = []
 comments_dict = []
@@ -50,6 +53,14 @@ print(res_stm)
 res_ltm = get_ltm()
 print(res_ltm)
 
+if USE_AGENT_BEHAVIOR:
+    agent_behavior = ""
+    NEVER_PROMPT_THRESHOLD = 5
+    if current_iteration != 0:
+        load_activity_memory_from_csv()
+    else:
+        initialize_activity_memory(agent_list)
+
 # Simulation loop
 for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
     num_agent = 0
@@ -71,8 +82,9 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
         at_least_one_follower = False
 
         # PHASE 0 - Follow another agent
-        if iteration != 0 and any(action['Agent'] == agent.name and action['Choice'] == 'Posting new content' for action in actions_dict):
-            suggested_follow_list = get_suggested_follow_list(agent, agent_list, agent_follows_list)
+        if iteration != 0: # and any(action['Agent'] == agent.name and action['Choice'] == 'Posting new content' for action in actions_dict):
+            #suggested_follow_list = get_suggested_follow_list(agent, agent_list, agent_follows_list)
+            suggested_follow_list = get_suggested_follow_list(agent, agent_list, agent_follows_list, personality_folder)
             suggested_follow_string = suggested_follows_to_string(suggested_follow_list, personality_folder)
             choice_7_prompt = follow_prompt_part_1 + "\n" + suggested_follow_string + follow_prompt_part_2
 
@@ -124,6 +136,14 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
             full_prompt = main_prompt_zero_follows
         else:
             agent_personality = read_from_file(f"{agent.name.lower()}.txt", personality_folder)
+            if USE_AGENT_BEHAVIOR:
+                profile_code = agent.name.lower().split('_')[-1]
+                agent_behavior = read_from_file(f"{profile_code}.txt", behavioral_folder)
+                agent_behavior_block = f"\n{agent_behavior_introduction}\n{agent_behavior}\n\n"
+                short_activity_mem_prompt = get_activity_summary_prompt(agent.name, iteration, NEVER_PROMPT_THRESHOLD)
+            else:
+                agent_behavior_block = ""
+                short_activity_mem_prompt = ""
             agent_follows_list = get_follow_list(agent)
             agent_followers_list = get_follower_list(agent)
             if len(agent_followers_list) != 0:
@@ -141,13 +161,13 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                     related_content_string = related_contents_to_string(related_content_list).rstrip('\n')
 
             if at_least_one_follower and at_least_one_follow:
-                full_prompt = feedbacks_prompt + "\n\n" + main_prompt_part_1 + "\n" + related_content_string + "\n" + main_prompt_part_2
+                full_prompt = feedbacks_prompt + agent_behavior_block + "\n" + main_prompt_part_1 + "\n" + related_content_string + "\n" + main_prompt_part_2 + short_activity_mem_prompt
             elif not at_least_one_follower and at_least_one_follow:
-                full_prompt = main_prompt_part_1 + "\n" + related_content_string + "\n" + main_prompt_part_2
+                full_prompt = agent_behavior_block + main_prompt_part_1 + "\n" + related_content_string + "\n" + main_prompt_part_2 + short_activity_mem_prompt
             elif at_least_one_follower and not at_least_one_follow:
-                full_prompt = feedbacks_prompt + "\n\n" + main_prompt_zero_follows
+                full_prompt = feedbacks_prompt +  agent_behavior_block + "\n" + main_prompt_zero_follows
             elif not at_least_one_follower and not at_least_one_follow:
-                full_prompt = main_prompt_zero_follows
+                full_prompt = agent_behavior_block + main_prompt_zero_follows
 
         user_proxy.initiate_chat(
             agent,
@@ -159,6 +179,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
 
         choice = int(json_answer_lower.get("choice", "").strip('"'))
         reason = json_answer_lower.get("reason", "")
+        if USE_AGENT_BEHAVIOR:
+            update_activity(agent.name, choice)
 
         # PHASE 2 - Inferencing basing on the Choice
         end_conversation = False
@@ -186,7 +208,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Agent': agent.name,
                         'Choice': 'Posting new content',
                         'Reason': reason,
-                        'Content': content
+                        'Content': content,
+                        'Original_Content_ID': "N/A"
                     })
                 else:
                     choice = 2
@@ -198,7 +221,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                     'Agent': agent.name,
                     'Choice': 'Not interacting',
                     'Reason': reason,
-                    'Content': "N/A"
+                    'Content': "N/A",
+                    'Original_Content_ID': "N/A"
                 })
             elif choice == 3 and at_least_one_follow:  # Sharing content
                 choice_3_prompt = choice_3_prompt_part_1 + "\n" + reason + "\n" + choice_3_prompt_part_2 + "\n" + related_content_string + "\n" + choice_3_prompt_part_3
@@ -245,7 +269,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Agent': agent.name,
                         'Choice': 'Sharing content',
                         'Reason': reason,
-                        'Content': content
+                        'Content': content,
+                        'Original_Content_ID': source_agent_id
                     })
             elif choice == 4 and at_least_one_follow:  # Liking content
                 choice_4_prompt = choice_4_prompt_part_1 + "\n" + reason + "\n" + choice_4_prompt_part_2 + "\n" + related_content_string + "\n" + choice_4_prompt_part_3
@@ -292,7 +317,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Agent': agent.name,
                         'Choice': 'Liking content',
                         'Reason': reason,
-                        'Content': content
+                        'Content': content,
+                        'Original_Content_ID': source_agent_id
                     })
             elif choice == 5 and at_least_one_follow:  # Disliking content
                 choice_5_prompt = choice_5_prompt_part_1 + "\n" + reason + "\n" + choice_5_prompt_part_2 + "\n" + related_content_string + "\n" + choice_5_prompt_part_3
@@ -339,7 +365,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Agent': agent.name,
                         'Choice': 'Disliking content',
                         'Reason': reason,
-                        'Content': content
+                        'Content': content,
+                        'Original_Content_ID': source_agent_id
                     })
             elif choice == 6 and at_least_one_follow:  # Commenting content
                 choice_6_prompt = choice_6_prompt_part_1 + "\n" + reason + "\n" + choice_6_prompt_part_2 + "\n" + related_content_string + "\n" + choice_6_prompt_part_3
@@ -511,7 +538,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Agent': agent.name,
                         'Choice': 'Commenting content',
                         'Reason': reason,
-                        'Content': content
+                        'Content': content,
+                        'Original_Content_ID': source_agent_id
                     })
 
                     comments_dict.append({
@@ -582,6 +610,9 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
         ltm_data = get_memory_data(get_ltm())
         save_to_csv(stm_data, 'stm')
         save_to_csv(ltm_data, 'ltm')
+
+        # Save short-term activity memory
+        save_activity_memory_to_csv()
 
         # Logs all interviews made by agents during the simulation
         #save_to_csv(interviews_dict, 'interviews_log')

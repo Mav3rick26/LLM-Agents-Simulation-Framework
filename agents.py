@@ -26,6 +26,7 @@ assistant = autogen.AssistantAgent(
 agent_list = []
 dataset_folder = ""
 personality_folder = ""
+behavioral_folder = ""
 
 if usa_election:
     dataset_folder = "Dataset/USA_Election"
@@ -78,7 +79,8 @@ if usa_election:
 
 
 elif personas:
-    personality_folder = "Personalities/personas_1001"
+    personality_folder = "Personalities/personas_personalities"
+    behavioral_folder = "behavior_profiles"
     
     for filename in os.listdir(personality_folder):
         if filename.endswith(".txt"):
