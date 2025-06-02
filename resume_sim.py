@@ -32,7 +32,9 @@ def load_actions_dict(csv_file_path):
             'Agent': row['Agent'],
             'Choice': row['Choice'],
             'Reason': row['Reason'],
-            'Content': row['Content']
+            'Content': row['Content'],
+            'Content_ID': row.get('Content_ID', 'N/A'),
+            'Original_Content_ID': row.get('Original_Content_ID', 'N/A')
         })
     return actions_dict
 

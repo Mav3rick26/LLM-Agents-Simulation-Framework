@@ -11,7 +11,7 @@ from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 10
+NUM_MAX_ITERATIONS = 4
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
@@ -209,6 +209,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Choice': 'Posting new content',
                         'Reason': reason,
                         'Content': content,
+                        'Content_ID': str(agent.name.lower()) + "_" + str(num_iteration),
                         'Original_Content_ID': "N/A"
                     })
                 else:
@@ -222,6 +223,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                     'Choice': 'Not interacting',
                     'Reason': reason,
                     'Content': "N/A",
+                    'Content_ID': "N/A",
                     'Original_Content_ID': "N/A"
                 })
             elif choice == 3 and at_least_one_follow:  # Sharing content
@@ -263,13 +265,16 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                     elif is_content_in_ltm(source_agent_id):
                         modify_ltm_virality_score(source_agent_id, SHARE_VIRALITY_SCORE)
 
+                    add_content_to_stm(agent, content, 0, 0, iteration, is_retweet=True)
                     end_conversation = True
+
                     actions_dict.append({
                         'Iteration': num_iteration,
                         'Agent': agent.name,
                         'Choice': 'Sharing content',
                         'Reason': reason,
                         'Content': content,
+                        'Content_ID': str(agent.name.lower()) + "_" + str(num_iteration),
                         'Original_Content_ID': source_agent_id
                     })
             elif choice == 4 and at_least_one_follow:  # Liking content
@@ -318,6 +323,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Choice': 'Liking content',
                         'Reason': reason,
                         'Content': content,
+                        'Content_ID': "N/A",
                         'Original_Content_ID': source_agent_id
                     })
             elif choice == 5 and at_least_one_follow:  # Disliking content
@@ -366,6 +372,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Choice': 'Disliking content',
                         'Reason': reason,
                         'Content': content,
+                        'Content_ID': "N/A",
                         'Original_Content_ID': source_agent_id
                     })
             elif choice == 6 and at_least_one_follow:  # Commenting content
@@ -539,6 +546,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Choice': 'Commenting content',
                         'Reason': reason,
                         'Content': content,
+                        'Content_ID': "N/A",
                         'Original_Content_ID': source_agent_id
                     })
 
@@ -594,6 +602,10 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
     # SIMULATION ENDING - Simulation output
     if iteration != 0:
         # Logs all actions taken during the simulation, including choices made by agents
+        for row in actions_dict:
+            for field in ['Content', 'Content_ID', 'Original_Content_ID']:
+                if field not in row or not row[field] or pd.isna(row[field]):
+                    row[field] = 'N/A'
         save_to_csv(actions_dict, 'simulation_log')
 
         # Logs all comments made by agents on content during the simulation

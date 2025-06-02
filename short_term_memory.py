@@ -15,13 +15,41 @@ def get_stm():  # Only get documents and ids from short term memory
     return res
 
 
-def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration):
+# def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration):
+#     ids: list = []
+#     metadatas: list = []
+#     documents: list = []
+
+#     ids.append(str(agent.name.lower()) + "_" + str(iteration + 1))
+#     metadatas.append({"Author": str(agent.name.lower()), "Virality Score": virality_score, "Sentiment Score": sentiment_score, "Iteration": iteration + 1})
+#     documents.append(content)
+
+#     try:
+#         short_term_memory.add(
+#             ids=ids,
+#             metadatas=metadatas,
+#             documents=documents
+#         )
+#     except Exception as e:
+#         print("Add data to db failed: ", e)
+
+
+def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration, is_retweet=False):
     ids: list = []
     metadatas: list = []
     documents: list = []
 
-    ids.append(str(agent.name.lower()) + "_" + str(iteration + 1))
-    metadatas.append({"Author": str(agent.name.lower()), "Virality Score": virality_score, "Sentiment Score": sentiment_score, "Iteration": iteration + 1})
+    content_id = str(agent.name.lower()) + "_" + str(iteration + 1)
+
+    ids.append(content_id)
+    metadatas.append({
+        "Author": str(agent.name.lower()),
+        "Virality Score": virality_score,
+        "Sentiment Score": sentiment_score,
+        "Iteration": iteration + 1,
+        "Content_ID": content_id,
+        "Is_Retweet": is_retweet
+    })
     documents.append(content)
 
     try:
@@ -31,7 +59,7 @@ def add_content_to_stm(agent, content, virality_score, sentiment_score, iteratio
             documents=documents
         )
     except Exception as e:
-        print("Add data to db failed: ", e)
+        print("Add data to STM failed: ", e)
 
 
 def modify_stm_virality_score(content_id, new_virality_score):
