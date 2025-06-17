@@ -79,7 +79,7 @@ if usa_election:
 
 
 elif personas:
-    personality_folder = "Personalities/personas_personalities"
+    personality_folder = "Personalities/personas_980"
     behavioral_folder = "behavior_profiles"
     
     for filename in os.listdir(personality_folder):
