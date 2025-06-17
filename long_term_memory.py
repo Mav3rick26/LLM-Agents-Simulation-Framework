@@ -13,14 +13,36 @@ def get_ltm():  # Only get documents and ids from long term memory
     return res
 
 
-def add_content_to_ltm(content_id, content, author, iteration, virality_score, sentiment_score):
-    ids: list = []
-    metadatas: list = []
-    documents: list = []
+# def add_content_to_ltm(content_id, content, author, iteration, virality_score, sentiment_score):
+#     ids: list = []
+#     metadatas: list = []
+#     documents: list = []
 
-    ids.append(content_id)
-    metadatas.append({"Author": author, "Iteration": iteration, "Virality Score": virality_score, "Sentiment Score": sentiment_score})
-    documents.append(content)
+#     ids.append(content_id)
+#     metadatas.append({"Author": author, "Iteration": iteration, "Virality Score": virality_score, "Sentiment Score": sentiment_score})
+#     documents.append(content)
+
+#     try:
+#         long_term_memory.add(
+#             ids=ids,
+#             metadatas=metadatas,
+#             documents=documents
+#         )
+#     except Exception as e:
+#         print("Add data to db failed: ", e)
+
+
+def add_content_to_ltm( content_id, content, author, iteration, virality_score, sentiment_score, original_content_id=None, direct_interaction_id=None):
+    ids = [content_id]
+    metadatas = [{
+        "Author": author,
+        "Iteration": iteration,
+        "Virality Score": virality_score,
+        "Sentiment Score": sentiment_score,
+        "Original_Content_ID": original_content_id if original_content_id else content_id,
+        "Direct_Interaction_ID": direct_interaction_id if direct_interaction_id else content_id
+    }]
+    documents = [content]
 
     try:
         long_term_memory.add(

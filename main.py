@@ -11,7 +11,7 @@ from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 4
+NUM_MAX_ITERATIONS = 10
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
@@ -53,6 +53,9 @@ print(res_stm)
 res_ltm = get_ltm()
 print(res_ltm)
 
+print("Number of agents:", len(agent_list))
+
+
 if USE_AGENT_BEHAVIOR:
     agent_behavior = ""
     NEVER_PROMPT_THRESHOLD = 5
@@ -87,6 +90,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
             suggested_follow_list = get_suggested_follow_list(agent, agent_list, agent_follows_list, personality_folder)
             suggested_follow_string = suggested_follows_to_string(suggested_follow_list, personality_folder)
             choice_7_prompt = follow_prompt_part_1 + "\n" + suggested_follow_string + follow_prompt_part_2
+
+            print(f"Inizio chat con: {agent.name} - Iteration {num_iteration}")
 
             user_proxy.initiate_chat(
                 agent,
@@ -154,7 +159,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                 feedbacks_prompt = feedbacks_prompt_part_1 + "\n" + feedbacks_string + "\n" + feedbacks_prompt_part_2
 
             if len(agent_follows_list) != 0:
-                related_content = search_recommended_contents(agent_personality, agent_follows_list)
+                related_content = search_recommended_contents(agent_personality, agent_follows_list, agent.name)
                 if related_content is not None:
                     at_least_one_follow = True
                     related_content_list = get_unique_contents(related_content)
@@ -200,8 +205,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                 content = json_answer_lower.get("new content", "")
 
                 if content != "N/A":
-                    add_content_to_stm(agent, content, 0, 0, iteration)
-
+                    content_id = add_content_to_stm(agent, content, 0, 0, iteration)
                     end_conversation = True
                     actions_dict.append({
                         'Iteration': num_iteration,
@@ -209,8 +213,9 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Choice': 'Posting new content',
                         'Reason': reason,
                         'Content': content,
-                        'Content_ID': str(agent.name.lower()) + "_" + str(num_iteration),
-                        'Original_Content_ID': "N/A"
+                        'Content_ID': content_id,
+                        'Original_Content_ID': "N/A",
+                        'Direct_Interaction_ID': "N/A"
                     })
                 else:
                     choice = 2
@@ -224,7 +229,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                     'Reason': reason,
                     'Content': "N/A",
                     'Content_ID': "N/A",
-                    'Original_Content_ID': "N/A"
+                    'Original_Content_ID': "N/A",
+                    'Direct_Interaction_ID': "N/A"
                 })
             elif choice == 3 and at_least_one_follow:  # Sharing content
                 choice_3_prompt = choice_3_prompt_part_1 + "\n" + reason + "\n" + choice_3_prompt_part_2 + "\n" + related_content_string + "\n" + choice_3_prompt_part_3
@@ -259,13 +265,17 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         reason = "Auto"
                 else:
                     source_agent_id = related_content['ids'][0][shared_content_id_index[-1]]
+                    original_id = related_content['metadatas'][0][shared_content_id_index[-1]].get("Original_Content_ID", source_agent_id)
+
                     if is_content_in_stm(source_agent_id):
                         modify_stm_virality_score(source_agent_id, SHARE_VIRALITY_SCORE)
                         evaluate_stm_content_for_ltm_transfer(source_agent_id)
                     elif is_content_in_ltm(source_agent_id):
                         modify_ltm_virality_score(source_agent_id, SHARE_VIRALITY_SCORE)
 
-                    add_content_to_stm(agent, content, 0, 0, iteration, is_retweet=True)
+                    content_id = add_content_to_stm(agent, content, 0, 0, iteration, is_retweet=True,
+                                                    original_content_id=original_id,
+                                                    direct_interaction_id=source_agent_id)
                     end_conversation = True
 
                     actions_dict.append({
@@ -274,8 +284,9 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Choice': 'Sharing content',
                         'Reason': reason,
                         'Content': content,
-                        'Content_ID': str(agent.name.lower()) + "_" + str(num_iteration),
-                        'Original_Content_ID': source_agent_id
+                        'Content_ID': content_id,
+                        'Original_Content_ID': original_id,
+                        'Direct_Interaction_ID': source_agent_id
                     })
             elif choice == 4 and at_least_one_follow:  # Liking content
                 choice_4_prompt = choice_4_prompt_part_1 + "\n" + reason + "\n" + choice_4_prompt_part_2 + "\n" + related_content_string + "\n" + choice_4_prompt_part_3
@@ -310,6 +321,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         reason = "Auto"
                 else:
                     source_agent_id = related_content['ids'][0][shared_content_id_index[-1]]
+                    original_id = related_content['metadatas'][0][shared_content_id_index[-1]].get("Original_Content_ID", source_agent_id)
                     if is_content_in_stm(source_agent_id):
                         modify_stm_sentiment_score(source_agent_id, LIKE_SENTIMENT_SCORE)
                         evaluate_stm_content_for_ltm_transfer(source_agent_id)
@@ -324,7 +336,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Reason': reason,
                         'Content': content,
                         'Content_ID': "N/A",
-                        'Original_Content_ID': source_agent_id
+                        'Original_Content_ID': original_id,
+                        'Direct_Interaction_ID': source_agent_id
                     })
             elif choice == 5 and at_least_one_follow:  # Disliking content
                 choice_5_prompt = choice_5_prompt_part_1 + "\n" + reason + "\n" + choice_5_prompt_part_2 + "\n" + related_content_string + "\n" + choice_5_prompt_part_3
@@ -359,6 +372,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         reason = "Auto"
                 else:
                     source_agent_id = related_content['ids'][0][shared_content_id_index[-1]]
+                    original_id = related_content['metadatas'][0][shared_content_id_index[-1]].get("Original_Content_ID", source_agent_id)
                     if is_content_in_stm(source_agent_id):
                         modify_stm_sentiment_score(source_agent_id, DISLIKE_SENTIMENT_SCORE)
                         evaluate_stm_content_for_ltm_transfer(source_agent_id)
@@ -373,7 +387,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Reason': reason,
                         'Content': content,
                         'Content_ID': "N/A",
-                        'Original_Content_ID': source_agent_id
+                        'Original_Content_ID': original_id,
+                        'Direct_Interaction_ID': source_agent_id
                     })
             elif choice == 6 and at_least_one_follow:  # Commenting content
                 choice_6_prompt = choice_6_prompt_part_1 + "\n" + reason + "\n" + choice_6_prompt_part_2 + "\n" + related_content_string + "\n" + choice_6_prompt_part_3
@@ -411,6 +426,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                     comment_history_string = ""
                     source_agent = ""
                     source_agent_id = related_content['ids'][0][shared_content_id_index[-1]]
+                    original_id = related_content['metadatas'][0][shared_content_id_index[-1]].get("Original_Content_ID", source_agent_id)
                     if is_content_in_stm(source_agent_id):
                         source_agent_string = get_source_agent_from_stm(source_agent_id)
                         source_agent = get_agent_from_agent_list(agent_list, source_agent_string)
@@ -547,7 +563,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                         'Reason': reason,
                         'Content': content,
                         'Content_ID': "N/A",
-                        'Original_Content_ID': source_agent_id
+                        'Original_Content_ID': original_id,
+                        'Direct_Interaction_ID': source_agent_id
                     })
 
                     comments_dict.append({
@@ -603,7 +620,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
     if iteration != 0:
         # Logs all actions taken during the simulation, including choices made by agents
         for row in actions_dict:
-            for field in ['Content', 'Content_ID', 'Original_Content_ID']:
+            for field in ['Content', 'Content_ID', 'Original_Content_ID', "Direct_Interaction_ID"]:
                 if field not in row or not row[field] or pd.isna(row[field]):
                     row[field] = 'N/A'
         save_to_csv(actions_dict, 'simulation_log')

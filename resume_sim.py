@@ -32,9 +32,10 @@ def load_actions_dict(csv_file_path):
             'Agent': row['Agent'],
             'Choice': row['Choice'],
             'Reason': row['Reason'],
-            'Content': row['Content'],
+            'Content': row.get('Content', 'N/A'),
             'Content_ID': row.get('Content_ID', 'N/A'),
-            'Original_Content_ID': row.get('Original_Content_ID', 'N/A')
+            'Original_Content_ID': row.get('Original_Content_ID', 'N/A'),
+            'Direct_Interaction_ID': row.get('Direct_Interaction_ID', 'N/A')
         })
     return actions_dict
 
@@ -79,14 +80,64 @@ def load_interviews_dict(csv_file_path):
     return interviews_dict
 
 
+# def load_stm(csv_file_path):
+#     df = pd.read_csv(csv_file_path)
+#     ids: list = []
+#     metadatas: list = []
+#     documents: list = []
+#     for index, row in df.iterrows():
+#         ids.append(row['ID'])
+#         metadatas.append({"Author": row['Author'], "Virality Score": row['Virality Score'], "Sentiment Score": row['Sentiment Score'], "Iteration": row['Iteration']})
+#         documents.append(row['Document'])
+
+#     try:
+#         short_term_memory.add(
+#             ids=ids,
+#             metadatas=metadatas,
+#             documents=documents
+#         )
+#     except Exception as e:
+#         print("Add data to db failed: ", e)
+
+
+# def load_ltm(csv_file_path):
+#     df = pd.read_csv(csv_file_path)
+#     ids: list = []
+#     metadatas: list = []
+#     documents: list = []
+#     for index, row in df.iterrows():
+#         ids.append(row['ID'])
+#         metadatas.append({"Author": row['Author'], "Virality Score": row['Virality Score'], "Sentiment Score": row['Sentiment Score'], "Iteration": row['Iteration']})
+#         documents.append(row['Document'])
+
+#     try:
+#         long_term_memory.add(
+#             ids=ids,
+#             metadatas=metadatas,
+#             documents=documents
+#         )
+#     except Exception as e:
+#         print("Add data to db failed: ", e)
+
+
 def load_stm(csv_file_path):
     df = pd.read_csv(csv_file_path)
     ids: list = []
     metadatas: list = []
     documents: list = []
+
     for index, row in df.iterrows():
+        metadata = {
+            "Author": row['Author'],
+            "Virality Score": row['Virality Score'],
+            "Sentiment Score": row['Sentiment Score'],
+            "Iteration": row['Iteration'],
+            "Is_Retweet": str(row.get('Is_Retweet', "False")).lower() == "true",
+            "Original_Content_ID": row['Original_Content_ID'],
+            "Direct_Interaction_ID": row['Direct_Interaction_ID']
+        }
         ids.append(row['ID'])
-        metadatas.append({"Author": row['Author'], "Virality Score": row['Virality Score'], "Sentiment Score": row['Sentiment Score'], "Iteration": row['Iteration']})
+        metadatas.append(metadata)
         documents.append(row['Document'])
 
     try:
@@ -96,7 +147,7 @@ def load_stm(csv_file_path):
             documents=documents
         )
     except Exception as e:
-        print("Add data to db failed: ", e)
+        print("Add data to STM failed: ", e)
 
 
 def load_ltm(csv_file_path):
@@ -104,9 +155,19 @@ def load_ltm(csv_file_path):
     ids: list = []
     metadatas: list = []
     documents: list = []
+
     for index, row in df.iterrows():
+        metadata = {
+            "Author": row['Author'],
+            "Virality Score": row['Virality Score'],
+            "Sentiment Score": row['Sentiment Score'],
+            "Iteration": row['Iteration'],
+            "Is_Retweet": str(row.get('Is_Retweet', "False")).lower() == "true",
+            "Original_Content_ID": row['Original_Content_ID'],
+            "Direct_Interaction_ID": row['Direct_Interaction_ID']
+        }
         ids.append(row['ID'])
-        metadatas.append({"Author": row['Author'], "Virality Score": row['Virality Score'], "Sentiment Score": row['Sentiment Score'], "Iteration": row['Iteration']})
+        metadatas.append(metadata)
         documents.append(row['Document'])
 
     try:
@@ -116,4 +177,4 @@ def load_ltm(csv_file_path):
             documents=documents
         )
     except Exception as e:
-        print("Add data to db failed: ", e)
+        print("Add data to LTM failed: ", e)

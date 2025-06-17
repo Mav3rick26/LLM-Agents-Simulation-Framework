@@ -34,22 +34,98 @@ def get_stm():  # Only get documents and ids from short term memory
 #         print("Add data to db failed: ", e)
 
 
-def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration, is_retweet=False):
+# def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration, is_retweet=False):
+#     ids: list = []
+#     metadatas: list = []
+#     documents: list = []
+
+#     content_id = str(agent.name.lower()) + "_" + str(iteration + 1)
+
+#     ids.append(content_id)
+#     metadatas.append({
+#         "Author": str(agent.name.lower()),
+#         "Virality Score": virality_score,
+#         "Sentiment Score": sentiment_score,
+#         "Iteration": iteration + 1,
+#         "Content_ID": content_id,
+#         "Is_Retweet": is_retweet
+#     })
+#     documents.append(content)
+
+#     try:
+#         short_term_memory.add(
+#             ids=ids,
+#             metadatas=metadatas,
+#             documents=documents
+#         )
+#     except Exception as e:
+#         print("Add data to STM failed: ", e)
+
+# def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration,
+#                        is_retweet=False, original_content_id=None, Direct_Interaction_ID=None):
+#     ids: list = []
+#     metadatas: list = []
+#     documents: list = []
+
+#     content_id = str(agent.name.lower()) + "_" + str(iteration + 1)
+#     ids.append(content_id)
+
+#     metadata = {
+#         "Author": str(agent.name.lower()),
+#         "Virality Score": virality_score,
+#         "Sentiment Score": sentiment_score,
+#         "Iteration": iteration + 1
+#     }
+
+#     if is_retweet:
+#         metadata["Is_Retweet"] = True
+#         metadata["Original_Content_ID"] = original_content_id
+#         metadata["Direct_Interaction_ID"] = Direct_Interaction_ID
+#     else:
+#         metadata["Is_Retweet"] = False
+#         metadata["Original_Content_ID"] = content_id
+#         metadata["Direct_Interaction_ID"] = content_id
+
+#     metadatas.append(metadata)
+#     documents.append(content)
+
+#     try:
+#         short_term_memory.add(
+#             ids=ids,
+#             metadatas=metadatas,
+#             documents=documents
+#         )
+#     except Exception as e:
+#         print("Add data to STM failed: ", e)
+
+#     return content_id  # utile se vuoi salvarlo nell'actions_dict
+
+
+def add_content_to_stm(agent, content, virality_score, sentiment_score, iteration,
+                       is_retweet=False, original_content_id=None, direct_interaction_id=None):
     ids: list = []
     metadatas: list = []
     documents: list = []
 
     content_id = str(agent.name.lower()) + "_" + str(iteration + 1)
-
     ids.append(content_id)
-    metadatas.append({
+
+    metadata = {
         "Author": str(agent.name.lower()),
         "Virality Score": virality_score,
         "Sentiment Score": sentiment_score,
-        "Iteration": iteration + 1,
-        "Content_ID": content_id,
-        "Is_Retweet": is_retweet
-    })
+        "Iteration": iteration + 1
+    }
+
+    if is_retweet:
+        metadata["Is_Retweet"] = True
+    else:
+        metadata["Is_Retweet"] = False
+
+    metadata["Original_Content_ID"] = original_content_id if original_content_id else content_id
+    metadata["Direct_Interaction_ID"] = direct_interaction_id if direct_interaction_id else content_id
+
+    metadatas.append(metadata)
     documents.append(content)
 
     try:
@@ -61,6 +137,7 @@ def add_content_to_stm(agent, content, virality_score, sentiment_score, iteratio
     except Exception as e:
         print("Add data to STM failed: ", e)
 
+    return content_id
 
 def modify_stm_virality_score(content_id, new_virality_score):
     res = short_term_memory.get(
@@ -90,19 +167,49 @@ def modify_stm_sentiment_score(content_id, new_sentiment_score):
     )
 
 
+# def evaluate_stm_content_for_ltm_transfer(content_id):
+#     res = short_term_memory.get(
+#         ids=content_id,
+#         include=["metadatas", "documents"],
+#     )
+
+#     content_author = res["metadatas"][0]["Author"]
+#     content_iteration = res["metadatas"][0]["Iteration"]
+#     virality_score = res["metadatas"][0]["Virality Score"]
+#     sentiment_score = res["metadatas"][0]["Sentiment Score"]
+
+#     if virality_score >= 2 or abs(sentiment_score) >= 1:
+#         add_content_to_ltm(content_id, res["documents"][0], content_author, content_iteration, virality_score, sentiment_score)
+#         delete_content_from_stm(content_id)
+
 def evaluate_stm_content_for_ltm_transfer(content_id):
     res = short_term_memory.get(
         ids=content_id,
         include=["metadatas", "documents"],
     )
 
-    content_author = res["metadatas"][0]["Author"]
-    content_iteration = res["metadatas"][0]["Iteration"]
-    virality_score = res["metadatas"][0]["Virality Score"]
-    sentiment_score = res["metadatas"][0]["Sentiment Score"]
+    metadata = res["metadatas"][0]
+    document = res["documents"][0]
+
+    content_author = metadata.get("Author", "")
+    content_iteration = metadata.get("Iteration", -1)
+    virality_score = metadata.get("Virality Score", 0)
+    sentiment_score = metadata.get("Sentiment Score", 0)
+
+    original_id = metadata.get("Original_Content_ID", content_id)
+    direct_id = metadata.get("Direct_Interaction_ID", content_id)
 
     if virality_score >= 2 or abs(sentiment_score) >= 1:
-        add_content_to_ltm(content_id, res["documents"][0], content_author, content_iteration, virality_score, sentiment_score)
+        add_content_to_ltm(
+            content_id=content_id,
+            content=document,
+            author=content_author,
+            iteration=content_iteration,
+            virality_score=virality_score,
+            sentiment_score=sentiment_score,
+            original_content_id=original_id,
+            direct_interaction_id=direct_id
+        )
         delete_content_from_stm(content_id)
 
 
