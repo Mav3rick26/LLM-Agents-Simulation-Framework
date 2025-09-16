@@ -11,7 +11,7 @@ from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 10
+NUM_MAX_ITERATIONS = 30
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
@@ -28,7 +28,7 @@ json_answer = {}
 
 agent_personality = ""
 
-USE_AGENT_BEHAVIOR = True
+USE_AGENT_BEHAVIOR = False
 
 actions_dict = []
 comments_dict = []
@@ -58,11 +58,12 @@ print("Number of agents:", len(agent_list))
 
 if USE_AGENT_BEHAVIOR:
     agent_behavior = ""
-    NEVER_PROMPT_THRESHOLD = 5
-    if current_iteration != 0:
-        load_activity_memory_from_csv()
-    else:
-        initialize_activity_memory(agent_list)
+
+NEVER_PROMPT_THRESHOLD = 5
+if current_iteration != 0:
+    load_activity_memory_from_csv()
+else:
+    initialize_activity_memory(agent_list)
 
 # Simulation loop
 for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
@@ -145,10 +146,9 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
                 profile_code = agent.name.lower().split('_')[-1]
                 agent_behavior = read_from_file(f"{profile_code}.txt", behavioral_folder)
                 agent_behavior_block = f"\n{agent_behavior_introduction}\n{agent_behavior}\n\n"
-                short_activity_mem_prompt = get_activity_summary_prompt(agent.name, iteration, NEVER_PROMPT_THRESHOLD)
             else:
                 agent_behavior_block = ""
-                short_activity_mem_prompt = ""
+            short_activity_mem_prompt = get_activity_summary_prompt(agent.name, iteration, NEVER_PROMPT_THRESHOLD)
             agent_follows_list = get_follow_list(agent)
             agent_followers_list = get_follower_list(agent)
             if len(agent_followers_list) != 0:
@@ -184,8 +184,8 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
 
         choice = int(json_answer_lower.get("choice", "").strip('"'))
         reason = json_answer_lower.get("reason", "")
-        if USE_AGENT_BEHAVIOR:
-            update_activity(agent.name, choice)
+        
+        update_activity(agent.name, choice)
 
         # PHASE 2 - Inferencing basing on the Choice
         end_conversation = False
