@@ -4,14 +4,14 @@ from prompts import *
 from short_term_activity_memory import *
 from short_term_memory import *
 from long_term_memory import *
-from recsys import search_recommended_contents
+from recsys import search_recommended_contents, search_random_contents
 from sentiment_analysis_utility import perform_sentiment_analysis
 from friends_network import *
 from output import save_to_csv, get_memory_data
 from resume_sim import *
 from simulation_saturation import compute_simulation_saturation
 
-NUM_MAX_ITERATIONS = 30
+NUM_MAX_ITERATIONS = 25
 current_iteration = get_iteration()
 
 SHARE_VIRALITY_SCORE = 1
@@ -28,7 +28,7 @@ json_answer = {}
 
 agent_personality = ""
 
-USE_AGENT_BEHAVIOR = False
+USE_AGENT_BEHAVIOR = True
 
 actions_dict = []
 comments_dict = []
@@ -160,6 +160,7 @@ for iteration in range(current_iteration, NUM_MAX_ITERATIONS):
 
             if len(agent_follows_list) != 0:
                 related_content = search_recommended_contents(agent_personality, agent_follows_list, agent.name)
+                #related_content = search_random_contents(agent.name)
                 if related_content is not None:
                     at_least_one_follow = True
                     related_content_list = get_unique_contents(related_content)
