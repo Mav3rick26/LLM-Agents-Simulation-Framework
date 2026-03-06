@@ -29,11 +29,17 @@ json_answer = {}
 agent_personality = ""
 
 USE_AGENT_BEHAVIOR = True
+INITIALIZE_NETWORK = True
 
 actions_dict = []
 comments_dict = []
 connections_dict = []
 #interviews_dict = []
+
+
+if INITIALIZE_NETWORK and current_iteration == 0:
+    load_friends_network('Output/connections_log.csv', agent_list)
+    connections_dict = load_connections_dict('Output/connections_log.csv')
 
 # Resume simulation
 if current_iteration != 0:

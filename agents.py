@@ -7,7 +7,8 @@ from utils import llama3, read_from_file, save_personality_to_file
 usa_election = False
 qanon = False
 brexit = False
-personas = True
+personas = False
+userCharRealCase = True
 
 user_proxy = autogen.UserProxyAgent(
     name="user_proxy",
@@ -78,8 +79,74 @@ if usa_election:
         agent_list.append(agent)
 
 
+elif userCharRealCase:
+    dataset_folder = "Dataset/userCharRealCase"
+    personality_folder = "Personalities/userCharRealCase"
+    behavioral_folder = "behavior_profiles"
+
+    os.makedirs(personality_folder, exist_ok=True)
+
+    df_users_behavTraits = pd.read_csv(
+        f'{dataset_folder}/nameAgent_behavioral_traits_ordered.csv',
+        encoding='utf-8'
+    )
+
+    users = df_users_behavTraits['agent'].unique()
+
+    df_original_tweets = pd.read_csv(
+        f'{dataset_folder}/dataset_completo_withText.csv',
+        encoding='utf-8'
+    )
+
+    for index, user in enumerate(users, start=1):
+
+        behavioral_group = (
+            df_users_behavTraits
+            .loc[df_users_behavTraits['agent'] == user, 'Behavioral_Group']
+            .iloc[0]
+            .upper()
+        )
+
+        agent_name = f"{user}_{behavioral_group}"
+        filename = f"{agent_name.lower()}.txt"
+        filepath = f"{personality_folder}/{filename}"
+
+        if not os.path.exists(filepath):
+            print(f'Agent {index}')
+
+            user_tweet = (
+                df_original_tweets[df_original_tweets['screen_name'] == user]['text']
+                .head(30)
+            )
+
+            user_tweet_string = '\n'.join(user_tweet)
+
+            task_for_personality = f"""These are contents published by {user} on a social network: {user_tweet_string} Describe {user}'s personality in 30 words basing on these contents using sentences like "You are..."."""
+
+            user_proxy.initiate_chat(
+                assistant,
+                message=task_for_personality
+            )
+
+            save_personality_to_file(
+                user_proxy.last_message()["content"],
+                agent_name.lower(),
+                folder=personality_folder
+            )
+
+        agent_personality = read_from_file(filename, personality_folder)
+
+        agent = autogen.AssistantAgent(
+            name=agent_name,
+            system_message=f"You are {user}. {agent_personality} You are tasked with making a decision about your activity on a social network based on feedback received on your previous posts and related content from other users.",
+            llm_config=llama3,
+        )
+
+        agent_list.append(agent)
+
+
 elif personas:
-    personality_folder = "Personalities/personas_personalities_mini"
+    personality_folder = "Personalities\personas_ocean2_1000"
     behavioral_folder = "behavior_profiles"
     
     for filename in os.listdir(personality_folder):

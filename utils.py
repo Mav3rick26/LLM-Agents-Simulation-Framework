@@ -11,14 +11,13 @@ model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')  # Embeddi
 llama3 = {
     "config_list": [
         {
-            "model": "meta-llama-3.1-8b-instruct",
-            "base_url": "http://localhost:1234/v1",
-            "api_key": "lm-studio",
+            "model": "llama3.1:latest",
+            "base_url": "http://localhost:11434/v1",
+            "api_key": "ollama",
         },
     ],
-    "cache_seed": None,  # Disable caching.
+    "cache_seed": None,
 }
-
 
 # GENERAL FUNCTIONS
 def save_personality_to_file(content, filename, folder):

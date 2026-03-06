@@ -1,5 +1,5 @@
-/Dataset/QAnon/QAnon_tweets.csv
-/Dataset/Brexit/Anti_Brexit_Users.csv
-/Dataset/Brexit/Pro_Brexit_Users.csv
-/Dataset/Brexit/User_Tweet.csv
-
+__pycache__/
+Dataset/
+Output/
+Personalities/
+personality_generation/
